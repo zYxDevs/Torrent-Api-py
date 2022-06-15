@@ -47,10 +47,11 @@ class PirateBay:
                                 "date": mixed[0].strip(),
                                 "hash": re.search(
                                     r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                                ).group(0),
+                                )[0],
                                 "magnet": magnet,
                             }
                         )
+
                     if len(my_dict["data"]) == self.LIMIT:
                         break
                 last_tr = soup.find_all("tr")[-1]
@@ -69,7 +70,7 @@ class PirateBay:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/search/{}/{}/99/0".format(query, page)
+            url = self.BASE_URL + f"/search/{query}/{page}/99/0"
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):
@@ -85,15 +86,17 @@ class PirateBay:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/top/all"
+            url = f"{self.BASE_URL}/top/all"
             return await self.parser_result(start_time, url, session)
 
     async def recent(self, category, page, limit):
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            if not category:
-                url = self.BASE_URL + "/recent"
-            else:
-                url = self.BASE_URL + "/{}/latest/".format(category)
+            url = (
+                self.BASE_URL + f"/{category}/latest/"
+                if category
+                else f"{self.BASE_URL}/recent"
+            )
+
             return await self.parser_result(start_time, url, session)

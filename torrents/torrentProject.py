@@ -88,7 +88,7 @@ class TorrentProject:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/?t={}&p={}".format(query, page - 1)
+            url = self.BASE_URL + f"/?t={query}&p={page - 1}"
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):

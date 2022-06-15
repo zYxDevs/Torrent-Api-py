@@ -43,12 +43,13 @@ class Zooqle:
                                 "leechers": leechers,
                                 "hash": re.search(
                                     r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                                ).group(0),
+                                )[0],
                                 "magnet": magnet,
                                 "url": self.BASE_URL + url,
                                 "date": date,
                             }
                         )
+
                     if len(my_dict["data"]) == self.LIMIT:
                         break
                 try:

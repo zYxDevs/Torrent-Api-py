@@ -34,7 +34,6 @@ CACHE_EXPIRATION = (
 
 
 @app.get("/api/v1/search")
-# @cache(expire=CACHE_EXPIRATION)
 async def call_api(
     site: str, query: str, limit: Optional[int] = 0, page: Optional[int] = 1
 ):
@@ -48,7 +47,7 @@ async def call_api(
     )
     if all_sites:
         resp = await all_sites[site]["website"]().search(query, page, limit)
-        if resp == None:
+        if resp is None:
             return {"error": "website blocked change ip or domain"}
         elif len(resp["data"]) > 0:
             return resp
@@ -58,7 +57,6 @@ async def call_api(
 
 
 @app.get("/api/v1/trending")
-# @cache(expire=CACHE_EXPIRATION)
 async def get_trending(
     site: str,
     limit: Optional[int] = 0,
@@ -74,33 +72,28 @@ async def get_trending(
         else limit
     )
     if all_sites:
-        if all_sites[site]["trending_available"]:
-            if category != None and not all_sites[site]["trending_category"]:
-                return {
-                    "error": "search by trending category not available for {}".format(
-                        site
-                    )
-                }
-            if category != None and category not in all_sites[site]["categories"]:
+        if not all_sites[site]["trending_available"]:
+            return {"error": f"trending search not availabe for {site}"}
+        if category != None:
+            if not all_sites[site]["trending_category"]:
+                return {"error": f"search by trending category not available for {site}"}
+            if category not in all_sites[site]["categories"]:
                 return {
                     "error": "selected category not available",
                     "available_categories": all_sites[site]["categories"],
                 }
-            resp = await all_sites[site]["website"]().trending(category, page, limit)
-            if not resp:
-                return {"error": "website blocked change ip or domain"}
-            elif len(resp["data"]) > 0:
-                return resp
-            else:
-                return {"error": "no results found"}
-
+        resp = await all_sites[site]["website"]().trending(category, page, limit)
+        if not resp:
+            return {"error": "website blocked change ip or domain"}
+        elif len(resp["data"]) > 0:
+            return resp
         else:
-            return {"error": "trending search not availabe for {}".format(site)}
+            return {"error": "no results found"}
+
     return {"error": "invalid site"}
 
 
 @app.get("/api/v1/category")
-# @cache(expire=CACHE_EXPIRATION)
 async def get_category(
     site: str,
     query: str,
@@ -110,37 +103,35 @@ async def get_category(
 ):
     all_sites = check_if_site_available(site)
     site = site.lower()
-    query = query.lower()
-    category = category.lower()
     limit = (
         all_sites[site]["limit"]
         if limit == 0 or limit > all_sites[site]["limit"]
         else limit
     )
     if all_sites:
-        if all_sites[site]["search_by_category"]:
-            if category not in all_sites[site]["categories"]:
-                return {
-                    "error": "selected category not available",
-                    "available_categories": all_sites[site]["categories"],
-                }
+        if not all_sites[site]["search_by_category"]:
+            return {"error": f"search by category not available for {site}"}
+        category = category.lower()
+        if category not in all_sites[site]["categories"]:
+            return {
+                "error": "selected category not available",
+                "available_categories": all_sites[site]["categories"],
+            }
 
-            resp = await all_sites[site]["website"]().search_by_category(
-                query, category, page, limit
-            )
-            if resp == None:
-                return {"error": "website blocked change ip or domain"}
-            elif len(resp["data"]) > 0:
-                return resp
-            else:
-                return {"error": "no results found"}
+        query = query.lower()
+        resp = await all_sites[site]["website"]().search_by_category(
+            query, category, page, limit
+        )
+        if resp is None:
+            return {"error": "website blocked change ip or domain"}
+        elif len(resp["data"]) > 0:
+            return resp
         else:
-            return {"error": "search by category not available for {}".format(site)}
+            return {"error": "no results found"}
     return {"error": "invalid site"}
 
 
 @app.get("/api/v1/recent")
-# @cache(expire=CACHE_EXPIRATION)
 async def get_recent(
     site: str,
     limit: Optional[int] = 0,
@@ -155,30 +146,25 @@ async def get_recent(
         if limit == 0 or limit > all_sites[site]["limit"]
         else limit
     )
-    if all_sites:
-        if all_sites[site]["recent_available"]:
-            if category != None and not all_sites[site]["recent_category_available"]:
-                return {
-                    "error": "search by recent category not available for {}".format(
-                        site
-                    )
-                }
-            if category != None and category not in all_sites[site]["categories"]:
-                return {
-                    "error": "selected category not available",
-                    "available_categories": all_sites[site]["categories"],
-                }
-            resp = await all_sites[site]["website"]().recent(category, page, limit)
-            if not resp:
-                return {"error": "website blocked change ip or domain"}
-            elif len(resp["data"]) > 0:
-                return resp
-            else:
-                return {"error": "no results found"}
-        else:
-            return {"error": "recent search not available for {}".format(site)}
-    else:
+    if not all_sites:
         return {"error": "invalid site"}
+    if not all_sites[site]["recent_available"]:
+        return {"error": f"recent search not available for {site}"}
+    if category != None:
+        if not all_sites[site]["recent_category_available"]:
+            return {"error": f"search by recent category not available for {site}"}
+        if category not in all_sites[site]["categories"]:
+            return {
+                "error": "selected category not available",
+                "available_categories": all_sites[site]["categories"],
+            }
+    resp = await all_sites[site]["website"]().recent(category, page, limit)
+    if not resp:
+        return {"error": "website blocked change ip or domain"}
+    elif len(resp["data"]) > 0:
+        return resp
+    else:
+        return {"error": "no results found"}
 
 
 @app.get("/")

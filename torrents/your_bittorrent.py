@@ -85,7 +85,7 @@ class YourBittorrent:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/?v=&c=&q={}".format(query)
+            url = self.BASE_URL + f"/?v=&c=&q={query}"
             return await self.parser_result(start_time, url, session, idx=6)
 
     async def parser_result(self, start_time, url, session, idx=1):
@@ -104,12 +104,12 @@ class YourBittorrent:
             self.LIMIT = limit
             idx = None
             if not category:
-                url = self.BASE_URL + "/top.html"
+                url = f"{self.BASE_URL}/top.html"
                 idx = 1
             else:
                 if category == "books":
                     category = "ebooks"
-                url = self.BASE_URL + f"/{category}.html"
+                url = f"{self.BASE_URL}/{category}.html"
                 idx = 4
             return await self.parser_result(start_time, url, session, idx)
 
@@ -119,11 +119,11 @@ class YourBittorrent:
             self.LIMIT = limit
             idx = None
             if not category:
-                url = self.BASE_URL + "/new.html"
+                url = f"{self.BASE_URL}/new.html"
                 idx = 1
             else:
                 if category == "books":
                     category = "ebooks"
-                url = self.BASE_URL + f"/{category}/latest.html"
+                url = f"{self.BASE_URL}/{category}/latest.html"
                 idx = 4
             return await self.parser_result(start_time, url, session, idx)
