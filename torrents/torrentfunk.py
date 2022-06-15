@@ -73,10 +73,11 @@ class TorrentFunk:
                             "date": date,
                             "seeders": seeders,
                             "leechers": leechers,
-                            "uploader": uploader if uploader else None,
+                            "uploader": uploader or None,
                             "url": url,
                         }
                     )
+
                     if len(my_dict["data"]) == self.LIMIT:
                         break
                 return my_dict, list_of_urls
@@ -87,7 +88,7 @@ class TorrentFunk:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/all/torrents/{}/{}.html".format(query, page)
+            url = self.BASE_URL + f"/all/torrents/{query}/{page}.html"
             return await self.parser_result(start_time, url, session, idx=6)
 
     async def parser_result(self, start_time, url, session, idx=1):
@@ -112,7 +113,7 @@ class TorrentFunk:
             start_time = time.time()
             self.LIMIT = limit
             if not category:
-                url = self.BASE_URL + "/movies/recent.html"
+                url = f"{self.BASE_URL}/movies/recent.html"
             else:
                 if category == "apps":
                     category = "software"
@@ -120,5 +121,5 @@ class TorrentFunk:
                     category = "television"
                 elif category == "books":
                     category = "ebooks"
-                url = self.BASE_URL + "/{}/recent.html".format(category)
+                url = self.BASE_URL + f"/{category}/recent.html"
             return await self.parser_result(start_time, url, session)

@@ -33,16 +33,17 @@ class x1337:
                     try:
                         poster = soup.select_one("div.torrent-image img")["src"]
                         if str(poster).startswith("//"):
-                            obj["poster"] = "https:" + poster
+                            obj["poster"] = f"https:{poster}"
                         elif str(poster).startswith("/"):
                             obj["poster"] = self.BASE_URL + poster
                     except:
                         pass
                     obj["magnet"] = magnet
 
-                    obj["hash"] = re.search(
-                        r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                    ).group(0)
+                    obj["hash"] = re.search(r"([{a-f\d,A-F\d}]{32,40})\b", magnet)[
+                        0
+                    ]
+
                 except IndexError:
                     pass
         except:
@@ -69,8 +70,7 @@ class x1337:
                 trs = soup.select("tbody tr")
                 for tr in trs:
                     td = tr.find_all("td")
-                    name = td[0].find_all("a")[-1].text
-                    if name:
+                    if name := td[0].find_all("a")[-1].text:
                         url = self.BASE_URL + td[0].find_all("a")[-1]["href"]
                         list_of_urls.append(url)
                         seeders = td[1].text
@@ -110,7 +110,7 @@ class x1337:
         async with aiohttp.ClientSession() as session:
             self.LIMIT = limit
             start_time = time.time()
-            url = self.BASE_URL + "/search/{}/{}/".format(query, page)
+            url = self.BASE_URL + f"/search/{query}/{page}/"
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):
@@ -127,29 +127,33 @@ class x1337:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            if not category:
-                url = self.BASE_URL + "/home/"
-            else:
-                url = self.BASE_URL + "/popular-{}".format(category.lower())
+            url = (
+                self.BASE_URL + f"/popular-{category.lower()}"
+                if category
+                else f"{self.BASE_URL}/home/"
+            )
+
             return await self.parser_result(start_time, url, session)
 
     async def recent(self, category, page, limit):
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            if not category:
-                url = self.BASE_URL + "/trending"
-            else:
-                url = self.BASE_URL + "/cat/{}/{}/".format(
-                    str(category).capitalize(), page
-                )
+            url = (
+                (self.BASE_URL + f"/cat/{str(category).capitalize()}/{page}/")
+                if category
+                else f"{self.BASE_URL}/trending"
+            )
+
             return await self.parser_result(start_time, url, session)
 
     async def search_by_category(self, query, category, page, limit):
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/category-search/{}/{}/{}/".format(
-                query, category.capitalize(), page
+            url = (
+                self.BASE_URL
+                + f"/category-search/{query}/{category.capitalize()}/{page}/"
             )
+
             return await self.parser_result(start_time, url, session)

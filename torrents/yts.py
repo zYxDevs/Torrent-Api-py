@@ -52,7 +52,7 @@ class Yts:
                         size = all_p[1].text
                         torrent_link = div.find("a", class_="download-torrent")["href"]
                         magnet = div.find("a", class_="magnet-download")["href"]
-                        hash = re.search(r"([{a-f\d,A-F\d}]{32,40})\b", magnet).group(0)
+                        hash = re.search(r"([{a-f\d,A-F\d}]{32,40})\b", magnet)[0]
                         torrents.append(
                             {
                                 "quality": quality,
@@ -132,14 +132,11 @@ class Yts:
             if page != 1:
                 url = (
                     self.BASE_URL
-                    + "/browse-movies/{}/all/all/0/latest/0/all?page={}".format(
-                        query, page
-                    )
+                    + f"/browse-movies/{query}/all/all/0/latest/0/all?page={page}"
                 )
+
             else:
-                url = self.BASE_URL + "/browse-movies/{}/all/all/0/latest/0/all".format(
-                    query
-                )
+                url = (self.BASE_URL + f"/browse-movies/{query}/all/all/0/latest/0/all")
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):
@@ -156,12 +153,12 @@ class Yts:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/trending-movies"
+            url = f"{self.BASE_URL}/trending-movies"
             return await self.parser_result(start_time, url, session)
 
     async def recent(self, category, page, limit):
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/browse-movies/0/all/all/0/featured/0/all"
+            url = f"{self.BASE_URL}/browse-movies/0/all/all/0/featured/0/all"
             return await self.parser_result(start_time, url, session)

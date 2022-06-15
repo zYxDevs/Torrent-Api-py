@@ -20,7 +20,7 @@ class Glodls:
                 soup = BeautifulSoup(html, "lxml")
 
                 my_dict = {"data": []}
-                for tr in soup.find_all("tr", class_="t-row")[0:-1:2]:
+                for tr in soup.find_all("tr", class_="t-row")[:-1:2]:
                     td = tr.find_all("td")
                     name = td[1].find_all("a")[-1].find("b").text
                     url = self.BASE_URL + td[1].find_all("a")[-1]["href"]
@@ -64,10 +64,9 @@ class Glodls:
             self.LIMIT = limit
             url = (
                 self.BASE_URL
-                + "/search_results.php?search={}&cat=0&incldead=0&inclexternal=0&lang=0&sort=seeders&order=desc&page={}".format(
-                    query, page - 1
-                )
+                + f"/search_results.php?search={query}&cat=0&incldead=0&inclexternal=0&lang=0&sort=seeders&order=desc&page={page - 1}"
             )
+
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):
@@ -83,12 +82,12 @@ class Glodls:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/today.php"
+            url = f"{self.BASE_URL}/today.php"
             return await self.parser_result(start_time, url, session)
 
     async def recent(self, category, page, limit):
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/search.php"
+            url = f"{self.BASE_URL}/search.php"
             return await self.parser_result(start_time, url, session)

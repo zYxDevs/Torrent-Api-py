@@ -26,7 +26,8 @@ class Limetorrent:
                     obj["magnet"] = a_tag[-1]["href"]
                     obj["hash"] = re.search(
                         r"([{a-f\d,A-F\d}]{32,40})\b", obj["magnet"]
-                    ).group(0)
+                    )[0]
+
                 except:
                     pass
         except:
@@ -95,7 +96,7 @@ class Limetorrent:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/search/all/{}//{}".format(query, page)
+            url = self.BASE_URL + f"/search/all/{query}//{page}"
             return await self.parser_result(start_time, url, session, idx=5)
 
     async def parser_result(self, start_time, url, session, idx=0):
@@ -112,7 +113,7 @@ class Limetorrent:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/top100"
+            url = f"{self.BASE_URL}/top100"
             return await self.parser_result(start_time, url, session)
 
     async def recent(self, category, page, limit):
@@ -120,14 +121,12 @@ class Limetorrent:
             start_time = time.time()
             self.LIMIT = limit
             if not category:
-                url = self.BASE_URL + "/latest100"
+                url = f"{self.BASE_URL}/latest100"
             else:
                 category = (category).capitalize()
                 if category == "Apps":
                     category = "Applications"
                 elif category == "Tv":
                     category = "TV-shows"
-                url = self.BASE_URL + "/browse-torrents/{}/date/{}/".format(
-                    category, page
-                )
+                url = (self.BASE_URL + f"/browse-torrents/{category}/date/{page}/")
             return await self.parser_result(start_time, url, session)

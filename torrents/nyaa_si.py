@@ -38,7 +38,7 @@ class NyaaSi:
                             "category": category,
                             "hash": re.search(
                                 r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                            ).group(0),
+                            )[0],
                             "magnet": magnet,
                             "torrent": torrent,
                             "url": self.BASE_URL + url,
@@ -46,6 +46,7 @@ class NyaaSi:
                             "downloads": downloads,
                         }
                     )
+
                     if len(my_dict["data"]) == self.LIMIT:
                         break
 
@@ -66,7 +67,7 @@ class NyaaSi:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/?f=0&c=0_0&q={}&p={}".format(query, page)
+            url = self.BASE_URL + f"/?f=0&c=0_0&q={query}&p={page}"
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):

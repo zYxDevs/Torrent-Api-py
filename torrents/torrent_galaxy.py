@@ -73,13 +73,14 @@ class TorrentGalaxy:
                                 "uploader": uploader,
                                 "hash": re.search(
                                     r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                                ).group(0),
+                                )[0],
                                 "magnet": magnet,
                                 "torrent": torrent,
                                 "url": self.BASE_URL + url,
                                 "date": date,
                             }
                         )
+
                     if len(my_dict["data"]) == self.LIMIT:
                         break
                 try:
@@ -105,10 +106,9 @@ class TorrentGalaxy:
             self.LIMIT = limit
             url = (
                 self.BASE_URL
-                + "/torrents.php?search=+{}&sort=seeders&order=desc&page={}".format(
-                    query, page - 1
-                )
+                + f"/torrents.php?search=+{query}&sort=seeders&order=desc&page={page - 1}"
             )
+
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):
@@ -132,16 +132,15 @@ class TorrentGalaxy:
             start_time = time.time()
             self.LIMIT = limit
             if not category:
-                url = self.BASE_URL + "/latest"
+                url = f"{self.BASE_URL}/latest"
             else:
                 if category == "documentaries":
                     category = "Docus"
                 url = (
                     self.BASE_URL
-                    + "/torrents.php?parent_cat={}&sort=id&order=desc&page={}".format(
-                        str(category).capitalize(), page - 1
-                    )
+                    + f"/torrents.php?parent_cat={str(category).capitalize()}&sort=id&order=desc&page={page - 1}"
                 )
+
             return await self.parser_result(start_time, url, session)
 
     #! Maybe Implemented in Future

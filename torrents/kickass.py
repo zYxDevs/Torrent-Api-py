@@ -21,8 +21,7 @@ class Kickass:
                 html = await res.text(encoding="ISO-8859-1")
                 soup = BeautifulSoup(html, "lxml")
                 try:
-                    poster = soup.find("a", class_="movieCover")
-                    if poster:
+                    if poster := soup.find("a", class_="movieCover"):
                         poster = poster.find("img")["src"]
                         obj["poster"] = self.BASE_URL + poster
                     imgs = (soup.find("div", class_="data")).find_all("img")
@@ -30,9 +29,10 @@ class Kickass:
                         obj["screenshot"] = [img["src"] for img in imgs]
                     magnet_and_torrent = soup.find_all("a", class_="kaGiantButton")
                     magnet = magnet_and_torrent[0]["href"]
-                    obj["hash"] = re.search(
-                        r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                    ).group(0)
+                    obj["hash"] = re.search(r"([{a-f\d,A-F\d}]{32,40})\b", magnet)[
+                        0
+                    ]
+
                     obj["magnet"] = magnet
                 except:
                     pass
@@ -102,7 +102,7 @@ class Kickass:
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            url = self.BASE_URL + "/usearch/{}/{}/".format(query, page)
+            url = self.BASE_URL + f"/usearch/{query}/{page}/"
             return await self.parser_result(start_time, url, session)
 
     async def parser_result(self, start_time, url, session):
@@ -120,21 +120,18 @@ class Kickass:
             start_time = time.time()
             self.LIMIT = limit
             if not category:
-                url = self.BASE_URL + "/top-100"
+                url = f"{self.BASE_URL}/top-100"
             else:
                 if category == "tv":
                     category == "television"
                 elif category == "apps":
                     category = "applications"
-                url = self.BASE_URL + "/top-100-{}/".format(category)
+                url = self.BASE_URL + f"/top-100-{category}/"
             return await self.parser_result(start_time, url, session)
 
     async def recent(self, category, page, limit):
         async with aiohttp.ClientSession() as session:
             start_time = time.time()
             self.LIMIT = limit
-            if not category:
-                url = self.BASE_URL + "/new/"
-            else:
-                url = self.BASE_URL + "/{}/".format(category)
+            url = self.BASE_URL + f"/{category}/" if category else f"{self.BASE_URL}/new/"
             return await self.parser_result(start_time, url, session)
